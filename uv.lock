@@ -1713,6 +1713,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "albumentations" },
+    { name = "ipykernel" },
     { name = "jupyter" },
     { name = "kaggle" },
     { name = "matplotlib" },
@@ -1733,6 +1734,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "albumentations" },
+    { name = "ipykernel" },
     { name = "jupyter" },
     { name = "kaggle" },
     { name = "matplotlib" },

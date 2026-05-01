@@ -19,6 +19,7 @@ dependencies = [
     "wandb",
     "kaggle",
     "python-dotenv",
+    "ipykernel",
 ]
 
 [[tool.uv.index]]
