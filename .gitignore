@@ -19,3 +19,5 @@ logs/
 lightning_logs/
 wandb/
 artifacts/
+
+.env

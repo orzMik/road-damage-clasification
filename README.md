@@ -41,6 +41,30 @@ To ensure your hardware acceleration (CUDA/MPS) is correctly detected, run:
 uv run scripts/check_env.py
 ```
 
+## Dataset Download
+
+The dataset is hosted on Kaggle. To download it automatically, each team member must use their own Kaggle API token.
+
+### 1. Get Kaggle Credentials
+
+Go to your Kaggle account **Settings** -> **API tokens** -> **Generate New Token**.
+
+
+### 2. Configure Local Environment
+1. Create a file named `.env` in the root directory of the project.
+2. Add your Kaggle credentials to this file exactly in this format:
+```text
+KAGGLE_USERNAME=your_username_here
+KAGGLE_KEY=your_api_key_here
+```
+
+### 3. Run the Download Script
+Execute the following command to download and extract the data:
+```bash
+uv run scripts/download_dataset.py
+```
+
+
 ## Project Structure
 * `data/`: Datasets (ignored by git).
 * `notebooks/`: Experimental notebooks for EDA and testing.

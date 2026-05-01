@@ -17,6 +17,8 @@ dependencies = [
     "torchvision",
     "ultralytics",
     "wandb",
+    "kaggle",
+    "python-dotenv",
 ]
 
 [[tool.uv.index]]
