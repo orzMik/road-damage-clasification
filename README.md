@@ -38,7 +38,7 @@ uv sync
 ### 3. Verify Environment
 To ensure your hardware acceleration (CUDA/MPS) is correctly detected, run:
 ```bash
-uv run check_env.py
+uv run scripts/check_env.py
 ```
 
 ## Project Structure
