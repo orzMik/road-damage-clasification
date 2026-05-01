@@ -1,44 +1,35 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
-name = "ProjectTemplate"
-version = "1.0"
-description = ""
-authors = [
-    { name = "Adrian Urbański" },
-]
-license = "MIT"
-license-files = ["LICEN[CS]E*"]
-requires-python = "~= 3.12"
-classifiers = [
-    "Environment :: GPU :: NVIDIA CUDA",
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-]
-
+name = "road-damage-classification"
+version = "0.1.0"
+description = "road damage detection with false positive reduction"
+readme = "README.md"
+requires-python = ">=3.12, <3.13" 
 dependencies = [
-    "torch",
-    "torchvision",
-    "lightning",
-    "click",
-    "wandb",
-    "fiddle",
-    "scipy",
+    "albumentations",
     "jupyter",
     "matplotlib",
+    "numpy",
+    "opencv-python",
+    "pandas",
+    "scikit-learn",
+    "seaborn",
+    "torch",
+    "torchvision",
+    "ultralytics",
+    "wandb",
 ]
 
-# mypy
-[[tool.mypy.overrides]]
-module = ["fiddle.*"]
-follow_untyped_imports = true
-ignore_missing_imports = true
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
 
-# Build configuration
-[tool.hatch.build.targets.wheel]
-packages = ["src"]
-
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu121", marker = "sys_platform == 'win32'" }, 
+    { index = "pytorch-cu121", marker = "sys_platform == 'linux'" }  
+]
+torchvision = [
+    { index = "pytorch-cu121", marker = "sys_platform == 'win32'" },
+    { index = "pytorch-cu121", marker = "sys_platform == 'linux'" }
+]
