@@ -13,13 +13,55 @@ Project for Neural Networks Course (2026). The goal is to detect and classify ro
 * **Framework**: PyTorch Lightning for training and Weights & Biases for experiment tracking.
 * **Environment Management**: `uv` for high-performance dependency resolution.
 
+## TODO & Milestones
+
+### ✅ Already Done
+* [x] Define project scope and problem (reducing false positives).
+* [x] Select initial dataset (Kaggle - 2009 images from Rome).
+* [x] Setup environment and dependency management (`uv`, `pyproject.toml`).
+* [x] Create core project structure, environment checkers, and dataset download scripts.
+* [x] Initial Exploratory Data Analysis (EDA) and draft training notebooks.
+
+### ⏳ Ongoing Tasks (Target: First Progress Meeting)
+
+**Data Preparation:**
+* [ ] Collect our own real-world photos of streets (potholes, cracks, and manholes).
+* [ ] Annotate the custom images and merge them with the base Kaggle dataset to improve model robustness.
+* [ ] Verify the correctness of the experimental setup (ensure proper train/val/test splits to avoid data leakage).
+
+**Pipeline & Baseline Implementation:**
+* [ ] Formulate the precise ML task and define evaluation metrics (e.g., mAP, with a special focus on tracking false positives for the manhole class).
+* [ ] Implement an end-to-end baseline training pipeline using PyTorch Lightning.
+* [ ] Integrate data augmentations (`albumentations`) into the data loaders.
+* [ ] Train the baseline solution (e.g., standard YOLOv8) on the initial dataset.
+* [ ] Connect Weights & Biases to log initial experiments and validate that the whole pipeline is working correctly.
+
+### Project Topic Meeting (March 31) - *6 points*
+* [x] Prepare presentation covering the problem to solve and planned methodology.
+* [x] Ensure clarity of the problem definition and suitability of the chosen dataset.
+* [x] Validate the feasibility of the project scope and the quality of the proposed approach.
+
+### First Progress Meeting (April 28 / May 12) - *12 points*
+* [ ] Correctly formulate the ML task.
+* [ ] Implement a baseline solution.
+* [ ] Conduct initial experiments and ensure the correctness of the experimental setup.
+* [ ] Demonstrate that the end-to-end project pipeline is working.
+
 ## Setup Instructions
 
-### 1. Install uv
+### 1. Clone the Repository
+First, clone the project repository to your local machine and navigate into the project directory:
+```bash
+git clone [https://github.com/orzmik/road-damage-clasification.git](https://github.com/orzmik/road-damage-clasification.git)
+cd road-damage-clasification
+
+```
+
+### 2. Install uv
 * **Windows (PowerShell)**: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 * **macOS**: `brew install uv`
 
-### 2. Initialize Environment
+### 3. Initialize Environment
 Run these commands in the project root directory:
 ```bash
 # Create virtual environment with Python 3.12
@@ -35,7 +77,7 @@ source .venv/bin/activate
 uv sync
 ```
 
-### 3. Verify Environment
+### 4. Verify Environment
 To ensure your hardware acceleration (CUDA/MPS) is correctly detected, run:
 ```bash
 uv run scripts/check_env.py
