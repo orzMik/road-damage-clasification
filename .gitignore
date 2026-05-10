@@ -20,4 +20,7 @@ lightning_logs/
 wandb/
 artifacts/
 
+data/yolo_split/
+   runs/
+
 .env
