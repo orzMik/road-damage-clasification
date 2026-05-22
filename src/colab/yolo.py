@@ -6,7 +6,6 @@ import os
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-from ultralytics import YOLO
 import wandb
 
 from src.config.constants import CLASSES
@@ -44,9 +43,15 @@ class WandbConfig:
 
 @dataclass(frozen=True)
 class TrainOutput:
-    model: YOLO
+    model: Any
     results: Any
     save_dir: Path
+
+
+def _load_yolo(weights: str | Path) -> Any:
+    from ultralytics import YOLO
+
+    return YOLO(str(weights))
 
 
 def mount_drive(mount_point: str = "/content/drive", force_remount: bool = False) -> Path:
@@ -114,9 +119,19 @@ def create_yolo_data_yaml(
     return output_path
 
 
-def init_wandb(config: WandbConfig) -> wandb.sdk.wandb_run.Run:
+def setup_wandb(config: WandbConfig) -> wandb.sdk.wandb_run.Run:
+    """Authenticate and enable Ultralytics W&B logging for training.
+
+    Ultralytics registers its W&B callbacks at import time, so this must run
+    before the first ``YOLO(...)`` call. ``project_dir`` in ``train_yolo`` is
+    only the local save path; W&B project/entity/name come from this config.
+    """
     if config.api_key:
         wandb.login(key=config.api_key)
+
+    from ultralytics import settings
+
+    settings.update({"wandb": True})
 
     project = config.project or os.getenv("WANDB_PROJECT")
     if not project:
@@ -128,6 +143,9 @@ def init_wandb(config: WandbConfig) -> wandb.sdk.wandb_run.Run:
     config_payload = dict(config.config) if config.config is not None else None
     tags = list(config.tags) if config.tags is not None else None
 
+    if wandb.run is not None:
+        return wandb.run
+
     return wandb.init(
         project=project,
         entity=entity,
@@ -136,6 +154,11 @@ def init_wandb(config: WandbConfig) -> wandb.sdk.wandb_run.Run:
         config=config_payload,
         tags=tags,
     )
+
+
+def init_wandb(config: WandbConfig) -> wandb.sdk.wandb_run.Run:
+    """Deprecated alias for :func:`setup_wandb`."""
+    return setup_wandb(config)
 
 
 def train_yolo(
@@ -148,12 +171,12 @@ def train_yolo(
     project_dir: str | Path | None = None,
     run_name: str | None = None,
     wandb_cfg: WandbConfig | None = None,
-    finish_wandb: bool = True,
     **train_kwargs: Any,
 ) -> TrainOutput:
-    run = init_wandb(wandb_cfg) if wandb_cfg is not None else None
+    if wandb_cfg is not None:
+        setup_wandb(wandb_cfg)
 
-    model = YOLO(str(weights))
+    model = _load_yolo(weights)
     args: dict[str, Any] = {
         "data": str(data_yaml),
         "epochs": epochs,
@@ -177,9 +200,6 @@ def train_yolo(
     else:
         save_dir = Path(save_dir_value)
 
-    if run is not None and finish_wandb:
-        wandb.finish()
-
     return TrainOutput(model=model, results=results, save_dir=save_dir)
 
 
@@ -190,13 +210,9 @@ def evaluate_yolo(
     device: int | str | None = None,
     project_dir: str | Path | None = None,
     run_name: str | None = None,
-    wandb_cfg: WandbConfig | None = None,
-    finish_wandb: bool = True,
     **val_kwargs: Any,
 ) -> Any:
-    run = init_wandb(wandb_cfg) if wandb_cfg is not None else None
-
-    model = YOLO(str(weights))
+    model = _load_yolo(weights)
     args: dict[str, Any] = {
         "data": str(data_yaml),
         "split": split,
@@ -209,12 +225,7 @@ def evaluate_yolo(
         args["name"] = run_name
     args.update(val_kwargs)
 
-    metrics = model.val(**args)
-
-    if run is not None and finish_wandb:
-        wandb.finish()
-
-    return metrics
+    return model.val(**args)
 
 
 def predict_yolo(
@@ -228,13 +239,9 @@ def predict_yolo(
     run_name: str | None = None,
     save: bool = True,
     save_txt: bool = False,
-    wandb_cfg: WandbConfig | None = None,
-    finish_wandb: bool = True,
     **predict_kwargs: Any,
 ) -> Any:
-    run = init_wandb(wandb_cfg) if wandb_cfg is not None else None
-
-    model = YOLO(str(weights))
+    model = _load_yolo(weights)
     if isinstance(source, (str, Path)):
         source_value: Any = str(source)
     else:
@@ -256,9 +263,4 @@ def predict_yolo(
         args["name"] = run_name
     args.update(predict_kwargs)
 
-    results = model.predict(**args)
-
-    if run is not None and finish_wandb:
-        wandb.finish()
-
-    return results
+    return model.predict(**args)

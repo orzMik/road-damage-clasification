@@ -3,9 +3,9 @@
 ### 1. Clone the Repository
 First, clone the project repository to your local machine and navigate into the project directory:
 ```bash
-git clone [https://github.com/orzmik/road-damage-clasification.git](https://github.com/orzmik/road-damage-clasification.git)
+git clone [https://github.com/orzmik/road-damage-detection.git](https://github.com/orzmik/road-damage-detection.git)
 
-cd road-damage-clasification
+cd road-damage-detection
 ```
 
 ### 2. Install uv
