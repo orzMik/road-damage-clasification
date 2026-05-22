@@ -22,3 +22,5 @@ artifacts/
 runs/
 
 .env
+
+*.pt

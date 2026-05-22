@@ -19,7 +19,7 @@ def train_baseline():
     )
 
     print("Initializing YOLOv8n (Nano) model - Baseline...")
-    model = YOLO("yolov8n.pt")
+    model = YOLO("yolov8n.pt") #dopisac
 
     results = model.train(
         data=str(PROJECT_ROOT / "road_damage.yaml"),

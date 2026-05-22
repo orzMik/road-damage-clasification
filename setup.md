@@ -71,3 +71,7 @@ WANDB_ENTITY=project-nn
 ```
 
 3. The training scripts will automatically detect these variables and sync results to the team workspace.
+
+## Google Colab
+
+Use `notebooks/colab_template.ipynb` as the shared starting point for Colab runs. It mounts Google Drive, configures a shared folder via `DriveConfig.drive_root`, and uses `src/colab/yolo.py` for training, evaluation, and inference with Ultralytics + W&B.
