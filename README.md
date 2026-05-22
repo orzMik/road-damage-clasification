@@ -26,6 +26,11 @@ Project for Neural Networks Course (2026). The goal is to detect and classify ro
 * `src/`: Core source code including models, datasets, and configurations.
 * `pyproject.toml`: Main project configuration and dependency management.
 
+## Google Colab Workflow
+Use `notebooks/colab_template.ipynb` as the starting point for training, evaluation, and inference in Colab. It clones the repo, mounts Google Drive, and calls helpers from `src/colab/yolo.py`.
+
+Set `DriveConfig.drive_root` to a shared location such as `Shareddrives/<shared_drive_name>/road-damage` to keep datasets, runs, and model artifacts in one shared folder.
+
 ## Team
 * Wiktor Małysa
 * Hubert Stolarz
