@@ -1,44 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import importlib.util
-import os
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Iterable, Sequence
 
-import wandb
+from src.config.wandb import WandbConfig, setup_wandb
 
-from src.config.constants import CLASSES
-
-
-@dataclass(frozen=True)
-class DriveConfig:
-    mount_point: str = "/content/drive"
-    drive_root: str = "MyDrive/road-damage"
-    datasets_dirname: str = "datasets"
-    runs_dirname: str = "runs"
-    models_dirname: str = "models"
-    artifacts_dirname: str = "artifacts"
-
-
-@dataclass(frozen=True)
-class DrivePaths:
-    root: Path
-    datasets: Path
-    runs: Path
-    models: Path
-    artifacts: Path
-
-
-@dataclass(frozen=True)
-class WandbConfig:
-    project: str | None = None
-    entity: str | None = None
-    name: str | None = None
-    job_type: str | None = None
-    api_key: str | None = None
-    config: Mapping[str, Any] | None = None
-    tags: Sequence[str] | None = None
+CLASSES = ("Pothole", "Crack", "Manhole")
 
 
 @dataclass(frozen=True)
@@ -52,41 +20,6 @@ def _load_yolo(weights: str | Path) -> Any:
     from ultralytics import YOLO
 
     return YOLO(str(weights))
-
-
-def mount_drive(mount_point: str = "/content/drive", force_remount: bool = False) -> Path:
-    if importlib.util.find_spec("google.colab") is None:
-        raise RuntimeError("Google Colab is required to mount Drive.")
-
-    from google.colab import drive
-
-    drive.mount(mount_point, force_remount=force_remount)
-    return Path(mount_point)
-
-
-def ensure_drive_paths(config: DriveConfig) -> DrivePaths:
-    mount_point = Path(config.mount_point)
-    if not mount_point.exists():
-        raise FileNotFoundError(
-            f"Drive mount not found at {config.mount_point}. Run mount_drive(...) first."
-        )
-
-    root = mount_point / config.drive_root
-    datasets = root / config.datasets_dirname
-    runs = root / config.runs_dirname
-    models = root / config.models_dirname
-    artifacts = root / config.artifacts_dirname
-
-    for path in (root, datasets, runs, models, artifacts):
-        path.mkdir(parents=True, exist_ok=True)
-
-    return DrivePaths(
-        root=root,
-        datasets=datasets,
-        runs=runs,
-        models=models,
-        artifacts=artifacts,
-    )
 
 
 def create_yolo_data_yaml(
@@ -117,48 +50,6 @@ def create_yolo_data_yaml(
 
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return output_path
-
-
-def setup_wandb(config: WandbConfig) -> wandb.sdk.wandb_run.Run:
-    """Authenticate and enable Ultralytics W&B logging for training.
-
-    Ultralytics registers its W&B callbacks at import time, so this must run
-    before the first ``YOLO(...)`` call. ``project_dir`` in ``train_yolo`` is
-    only the local save path; W&B project/entity/name come from this config.
-    """
-    if config.api_key:
-        wandb.login(key=config.api_key)
-
-    from ultralytics import settings
-
-    settings.update({"wandb": True})
-
-    project = config.project or os.getenv("WANDB_PROJECT")
-    if not project:
-        raise ValueError(
-            "W&B project is required. Set WANDB_PROJECT or pass WandbConfig.project."
-        )
-
-    entity = config.entity or os.getenv("WANDB_ENTITY")
-    config_payload = dict(config.config) if config.config is not None else None
-    tags = list(config.tags) if config.tags is not None else None
-
-    if wandb.run is not None:
-        return wandb.run
-
-    return wandb.init(
-        project=project,
-        entity=entity,
-        name=config.name,
-        job_type=config.job_type,
-        config=config_payload,
-        tags=tags,
-    )
-
-
-def init_wandb(config: WandbConfig) -> wandb.sdk.wandb_run.Run:
-    """Deprecated alias for :func:`setup_wandb`."""
-    return setup_wandb(config)
 
 
 def train_yolo(

@@ -74,4 +74,22 @@ WANDB_ENTITY=project-nn
 
 ## Google Colab
 
-Use `notebooks/colab_template.ipynb` as the shared starting point for Colab runs. It mounts Google Drive, configures a shared folder via `DriveConfig.drive_root`, and uses `src/colab/yolo.py` for training, evaluation, and inference with Ultralytics + W&B.
+### Bootstrap template
+Use [`notebooks/colab_template.ipynb`](notebooks/colab_template.ipynb) to clone the repo, mount Google Drive, and set up paths. Other Colab notebooks duplicate these setup cells.
+
+Set `DRIVE_ROOT` in the notebook:
+* My Drive: `MyDrive/road-damage-detection`
+* Shared drive: `Shareddrives/<TeamDrive>/road-damage-detection`
+
+Expected Drive layout under `{DRIVE_ROOT}/`:
+```
+data/processed-yolo/
+models/
+runs/
+wroclaw_images/
+```
+
+### YOLOv8 baseline
+Use [`notebooks/yolo_v8_baseline.ipynb`](notebooks/yolo_v8_baseline.ipynb) for the baseline training run: W&B logging, test-set evaluation, and inference on images in `wroclaw_images/`.
+
+Colab helpers are in `src/config/colab/drive.py`, `src/config/wandb.py`, and `src/config/yolo.py`.

@@ -27,9 +27,14 @@ Project for Neural Networks Course (2026). The goal is to detect and classify ro
 * `pyproject.toml`: Main project configuration and dependency management.
 
 ## Google Colab Workflow
-Use `notebooks/colab_template.ipynb` as the starting point for training, evaluation, and inference in Colab. It clones the repo, mounts Google Drive, and calls helpers from `src/colab/yolo.py`.
+* **`notebooks/colab_template.ipynb`** — bootstrap only: clone repo, mount Drive, resolve paths (`data/`, `models/`, `runs/`, `wroclaw_images/`).
+* **`notebooks/yolo_v8_baseline.ipynb`** — baseline YOLOv8 experiment: train, test evaluation, inference on `wroclaw_images/`.
 
-Set `DriveConfig.drive_root` to a shared location such as `Shareddrives/<shared_drive_name>/road-damage` to keep datasets, runs, and model artifacts in one shared folder.
+Helpers live under `src/config/colab/drive.py`, `src/config/wandb.py`, and `src/config/yolo.py` (also re-exported from `src/colab`).
+
+Set `DRIVE_ROOT` in the notebook to match your Drive location:
+* My Drive: `MyDrive/road-damage-detection`
+* Shared drive: `Shareddrives/<TeamDrive>/road-damage-detection`
 
 ## Team
 * Wiktor Małysa
