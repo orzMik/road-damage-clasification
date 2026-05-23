@@ -1,0 +1,10 @@
+path: data/processed-yolo
+
+train: train/images
+val: val/images
+test: test/images
+
+names:
+  0: Pothole
+  1: Crack
+  2: Manhole

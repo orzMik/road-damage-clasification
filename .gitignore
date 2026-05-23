@@ -19,5 +19,8 @@ logs/
 lightning_logs/
 wandb/
 artifacts/
+runs/
 
 .env
+
+*.pt

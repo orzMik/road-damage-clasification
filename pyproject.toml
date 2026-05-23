@@ -20,6 +20,7 @@ dependencies = [
     "kaggle",
     "python-dotenv",
     "ipykernel",
+    "lightning",
 ]
 
 [[tool.uv.index]]
