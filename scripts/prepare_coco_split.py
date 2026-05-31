@@ -1,18 +1,10 @@
-"""
-Prepare COCO splits for RF-DETR training.
+"""Prepare COCO splits for RF-DETR training.
 
-Splits data/annotations_coco.json into train/valid/test using the SAME seed
+Splits data/raw/annotations_coco.json into train/valid/test using the SAME seed
 as the YOLO baseline (42, 70/15/15) so results are directly comparable.
 
-Output:
-    data/coco_split/
-      train/
-        _annotations.coco.json
-        <symlinked images>
-      valid/
-        _annotations.coco.json
-      test/
-        _annotations.coco.json
+Remaps category IDs from {0,1,2} to {1,2,3} because RF-DETR (following Roboflow
+COCO convention) treats id=0 as background.
 
 Run:  uv run scripts/prepare_coco_split.py
 """
@@ -23,8 +15,9 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-IMAGES_DIR = DATA_DIR / "images"
-COCO_JSON = DATA_DIR / "annotations_coco.json"
+RAW_DIR = DATA_DIR / "raw"
+IMAGES_DIR = RAW_DIR / "images"
+COCO_JSON = RAW_DIR / "annotations_coco.json"
 OUTPUT_DIR = DATA_DIR / "coco_split"
 
 TRAIN_RATIO = 0.70
@@ -41,12 +34,19 @@ def main():
     with open(COCO_JSON) as f:
         coco = json.load(f)
 
-    print(
-        f"  {len(coco['images'])} images, "
-        f"{len(coco['annotations'])} annotations, "
-        f"{len(coco['categories'])} categories"
-    )
-    print(f"  Categories: {[c['name'] for c in coco['categories']]}")
+    print(f"  {len(coco['images'])} images, {len(coco['annotations'])} annotations")
+
+    # Remap category IDs: original {0,1,2} -> new {1,2,3}
+    # RF-DETR treats category_id=0 as background by convention
+    id_remap = {cat["id"]: cat["id"] + 1 for cat in coco["categories"]}
+    new_categories = [
+        {**cat, "id": id_remap[cat["id"]]} for cat in coco["categories"]
+    ]
+    new_annotations = [
+        {**ann, "category_id": id_remap[ann["category_id"]]}
+        for ann in coco["annotations"]
+    ]
+    print(f"  Categories after remap: {[(c['id'], c['name']) for c in new_categories]}")
 
     if OUTPUT_DIR.exists():
         shutil.rmtree(OUTPUT_DIR)
@@ -59,7 +59,6 @@ def main():
     n = len(shuffled)
     n_train = int(n * TRAIN_RATIO)
     n_val = int(n * VAL_RATIO)
-
     splits = {
         "train": shuffled[:n_train],
         "valid": shuffled[n_train : n_train + n_val],
@@ -69,11 +68,8 @@ def main():
     for split_name, split_images in splits.items():
         split_dir = OUTPUT_DIR / split_name
         split_dir.mkdir(parents=True)
-
         image_ids = {img["id"] for img in split_images}
-        split_annotations = [
-            a for a in coco["annotations"] if a["image_id"] in image_ids
-        ]
+        split_annotations = [a for a in new_annotations if a["image_id"] in image_ids]
 
         for img in split_images:
             src = IMAGES_DIR / img["file_name"]
@@ -86,17 +82,14 @@ def main():
         split_coco = {
             "info": coco.get("info", {}),
             "licenses": coco.get("licenses", []),
-            "categories": coco["categories"],
+            "categories": new_categories,
             "images": split_images,
             "annotations": split_annotations,
         }
         with open(split_dir / "_annotations.coco.json", "w") as f:
             json.dump(split_coco, f)
 
-        print(
-            f"  {split_name}: {len(split_images)} images, "
-            f"{len(split_annotations)} annotations"
-        )
+        print(f"  {split_name}: {len(split_images)} images, {len(split_annotations)} annotations")
 
     print(f"\nDone. Output: {OUTPUT_DIR}")
 
