@@ -21,6 +21,8 @@ dependencies = [
     "python-dotenv",
     "ipykernel",
     "lightning",
+    "rfdetr>=1.7.1",
+    "supervision>=0.28.0",
 ]
 
 [[tool.uv.index]]
