@@ -1,25 +1,22 @@
-"""Run RF-DETR inference on a folder of images (e.g., Wroclaw photos).
+"""Run RF-DETR inference locally on Mac (CPU mode) with EXIF orientation fix.
 
-Requires CUDA GPU; intended to run on Colab. The trained checkpoint
-(checkpoint_best_ema.pth) must be at runs/rfdetr_baseline/.
-
-Run:  python scripts/run_rfdetr_inference.py
+Use for small batches only — CPU inference is slow for transformer models.
 """
 import sys
 from pathlib import Path
 
 import numpy as np
 import supervision as sv
-from PIL import Image
+import torch
+from PIL import Image, ImageOps
 from rfdetr import RFDETRBase
 
 PROJECT_ROOT = Path(__file__).parent.parent
 CHECKPOINT = PROJECT_ROOT / "runs" / "rfdetr_baseline" / "checkpoint_best_ema.pth"
-DEFAULT_INPUT = PROJECT_ROOT / "data" / "wroclaw"
-OUTPUT_DIR = PROJECT_ROOT / "inference_results" / "rfdetr_wroclaw"
+DEFAULT_INPUT = PROJECT_ROOT / "data" / "wroclaw_mikolaj"
+OUTPUT_DIR = PROJECT_ROOT / "inference_results" / "rfdetr_wroclaw_mikolaj"
 CONF_THRESHOLD = 0.25
 
-# Category IDs after remap (see prepare_coco_split.py): 1=pothole, 2=crack, 3=manhole
 CLASS_NAMES = {0: "pothole", 1: "crack", 2: "manhole"}
 
 
@@ -27,6 +24,7 @@ def main():
     input_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_INPUT
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    print(f"PyTorch device: {'cuda' if torch.cuda.is_available() else 'cpu (slow but works)'}")
     print(f"Loading model from {CHECKPOINT}")
     model = RFDETRBase(pretrain_weights=str(CHECKPOINT), num_classes=3)
 
@@ -40,7 +38,9 @@ def main():
 
     summary = []
     for img_path in image_paths:
+        print(f"  Processing {img_path.name}...")
         image = Image.open(img_path).convert("RGB")
+        image = ImageOps.exif_transpose(image)  # Apply EXIF rotation
         detections = model.predict(image, threshold=CONF_THRESHOLD)
         labels = [
             f"{CLASS_NAMES.get(int(c), '?')}({conf:.2f})"
@@ -56,7 +56,7 @@ def main():
             f"  {img_path.name}: {', '.join(labels) if labels else 'no detections'}"
         )
 
-    print("=== Detections summary ===")
+    print("\n=== Detections summary ===")
     print("\n".join(summary))
     print(f"\nAnnotated images saved to {OUTPUT_DIR}")
 
