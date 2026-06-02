@@ -1,5 +1,4 @@
-path: data/processed-yolo
-
+path: D:/Prace/Prace do szkoly/Uczelnia/Informatyka II stopien/II semestr/Neural Networks/road-damage-clasification/data/processed/yolo
 train: train/images
 val: val/images
 test: test/images
