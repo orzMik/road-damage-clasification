@@ -31,3 +31,7 @@
 * [ ] Implement a baseline solution.
 * [ ] Conduct initial experiments and ensure the correctness of the experimental setup.
 * [ ] Demonstrate that the end-to-end project pipeline is working.
+
+## New
+Rf-detr - do we really need
+- podsumowanie stattytyk datasetu, ile jest danych klas w zbiorze treningowym
