@@ -1,0 +1,12 @@
+# Lokalna konfiguracja Huberta - nie wysyłać na GitHuba!
+path: C:/Users/huber/Documents/GitHub/road-damage-clasification
+
+train: data/processed-yolo/train/images
+val: data/processed-yolo/val/images
+test: data/processed-yolo/test/images
+
+nc: 3
+names:
+  0: Pothole
+  1: Crack
+  2: Manhole
